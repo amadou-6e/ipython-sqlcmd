@@ -8,6 +8,7 @@ from typing import List, Tuple, Dict, Optional, Any
 from IPython import get_ipython
 
 from .exceptions import SQLExecutionError
+# from exceptions import SQLExecutionError
 
 
 def handle_sql_error(

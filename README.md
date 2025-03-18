@@ -14,7 +14,7 @@ An IPython magic extension for executing SQL queries against Microsoft SQL Serve
 ## Installation
 
 ```bash
-pip install sqlcmd-magic
+pip install ipython-sqlcmd
 ```
 
 ## Requirements

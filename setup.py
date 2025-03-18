@@ -4,10 +4,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="sqlcmd",
-    version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    name="ipython-sqlcmd",
+    version="0.1.4",
+    author="Amadou Wolfgang Cisse",
+    author_email="amadou.6e@googelmail.com",
     description="SQL Command Magic for IPython",
     long_description=long_description,
     long_description_content_type="text/markdown",

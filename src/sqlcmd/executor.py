@@ -5,6 +5,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Optional, Tuple
 from .parser import split_sql_batches
+# from parser import split_sql_batches
 
 # Global directory for caching session output
 CACHE_DIR = Path(Path.home(), "sqlcmd_magic_cache")
@@ -156,7 +157,7 @@ class SQLExecutor:
                 # This list will accumulate all DataFrames detected in the stream
                 dataframe_list = []
 
-                print_flag = True
+                stdout_print_flag = True
                 error_print_flag = True
 
                 with subprocess.Popen(
@@ -213,15 +214,20 @@ class SQLExecutor:
                                 continue
 
                         # Process non-table data immediately
-                        if out == "/*":
-                            print_flag = False
-                        if print_flag and out:
+                        if out.startswith("/*"):
+                            stdout_print_flag = False
+                        if stdout_print_flag and out:
                             print(out)
-                        if out == "*/":
-                            print_flag = True
+                        if out.startswith("*/"):
+                            stdout_print_flag = True
 
-                    for line in proc.stderr:
-                        print(line)
+                    for out in proc.stderr:
+                        if out.startswith("/*"):
+                            error_print_flag = False
+                        if error_print_flag and out:
+                            print(out)
+                        if out.startswith("*/"):
+                            error_print_flag = True
 
                     # End-of-stream: if any table data remains, process it.
                     if table_data_lines and separator_seen:
@@ -289,7 +295,7 @@ if __name__ == "__main__":
     # Set the connection string manually (equivalent to your sqlcmd command)
     connection.set_connection_string(
         "mssql+sqlcmd:///?odbc_connect=" +
-        urllib.parse.quote("SERVER=localhost;DATABASE=Northwind;UID=sa;PWD=None"))
+        urllib.parse.quote("SERVER=localhost;DATABASE=Northwind;UID=sa;PWD=mypassword1234!"))
 
     # Ensure the connection information is available
     if not connection.connection_info:
@@ -302,8 +308,7 @@ if __name__ == "__main__":
     sql_executor = SQLExecutor(connection=connection, parser=parser)
 
     # SQL file path based on the provided sqlcmd command
-    sql_file_path = Path(
-        "C:\\Users\\acisse\\sqlcmd_magic_cache\\sql_batches_1741350970\\batch_0.sql")
+    sql_file_path = Path(Path(__file__).parent.parent, "tests", "empty.sql")
 
     # Read the SQL content from the file
     if sql_file_path.exists():
@@ -312,8 +317,8 @@ if __name__ == "__main__":
     else:
         raise FileNotFoundError(f"SQL file not found: {sql_file_path}")
 
-    # Execute the SQL content
-    result_df = sql_executor.execute_sql(sql_content, debug=True)
+    # Execute the SQL content f"""SELECT TOP 5 * FROM Customers;EXECUTE_SQL_FILE '{sql_file_path}'"""
+    result_df = sql_executor.execute_sql(f"""EXECUTE_SQL_FILE '{sql_file_path}'""")
 
     # Display the output DataFrame if available
     if result_df is not None:
